@@ -304,3 +304,27 @@ resource "aws_autoscaling_group" "app-asg" {
 
 # DB
 
+resource "aws_db_subnet_group" "db-subnet-group" {
+  name = "db subnet group"
+  subnet_ids = [aws_subnet.db-sub1.id,aws_subnet.db-sub2.id]
+
+  tags = {
+    Name = "DB"
+  }
+}
+data "aws_secretsmanager_secret" "password" {
+  name = "test-db-password"
+
+}
+
+resource "aws_db_instance" "rds-db" {
+    allocated_storage    = 10
+  db_name              = "mydbrds"
+  engine               = "mysql"
+  engine_version       = "5.7"
+  instance_class       = "db.t3.micro"
+  username             = "dbuser"
+  password             = data.aws_secretsmanager_secret_version.password
+  parameter_group_name = "default.mysql5.7"
+  skip_final_snapshot  = true
+}
