@@ -11,8 +11,11 @@ resource "aws_secretsmanager_secret" "password" {
 resource "aws_secretsmanager_secret_version" "password" {
   secret_id = aws_secretsmanager_secret.password.id
   secret_string = random_password.master.result
+
 }
 
-output "secret_id" {
-  value = jsondecode(aws_secretsmanager_secret_version.password.secret_string)["key1"]
+output "db_password" {
+  value     = aws_secretsmanager_secret_version.password.secret_string
+  sensitive = true
+  description = "The generated database password stored in AWS Secrets Manager"
 }

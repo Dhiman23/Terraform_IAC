@@ -10,7 +10,7 @@ resource "aws_security_group" "asg-app-sg" {
       to_port     = ingress.value
       protocol    = "tcp"
       cidr_blocks = ["0.0.0.0/0"]
-      security_groups = [aws_security_group.asg-web-sg.id]
+      security_groups = [aws_security_group.alb-sg-app.id]
     }
   }
  egress {

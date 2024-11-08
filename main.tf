@@ -155,7 +155,7 @@ resource "aws_launch_template" "web" {
     device_index = 0
     security_groups = [aws_security_group.asg-web-sg.id]
   }
-
+  user_data       = templatefile("./script.sh", {})
 tag_specifications {
   resource_type = "instance"
   tags = {
@@ -312,13 +312,9 @@ resource "aws_db_subnet_group" "db-subnet-group" {
     Name = "DB"
   }
 }
-data "aws_secretsmanager_secret" "password" {
-  name = "test-db-password"
-
-}
 
 resource "aws_db_instance" "rds-db" {
-    allocated_storage    = 10
+  allocated_storage    = 10
   db_name              = "mydbrds"
   engine               = "mysql"
   engine_version       = "5.7"
@@ -326,5 +322,7 @@ resource "aws_db_instance" "rds-db" {
   username             = "dbuser"
   password             = data.aws_secretsmanager_secret_version.password
   parameter_group_name = "default.mysql5.7"
+  db_subnet_group_name = aws_db_subnet_group.db-subnet-group.name
+  vpc_security_group_ids = [ aws_security_group.db-sg.id ]
   skip_final_snapshot  = true
 }
