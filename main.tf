@@ -159,7 +159,7 @@ resource "aws_launch_template" "web" {
 tag_specifications {
   resource_type = "instance"
   tags = {
-    Name = "web"
+    Name = "web-lt"
   }  
 }
 }
@@ -170,7 +170,7 @@ resource "aws_alb" "web-alb" {
    name               = "web-alb"
   internal           = false
   load_balancer_type = "application"
-  security_groups    = [aws_security_group.alb-sg-web]
+  security_groups    = [aws_security_group.alb-sg-web.id]
   subnets            = [aws_subnet.web-sub1.id,aws_subnet.web-sub2.id]
 
   tags = {
@@ -208,8 +208,8 @@ resource "aws_lb_listener" "web-listener" {
 # ----------------------------------------------------------------------->
 # AutoScaling Group
 
-resource "aws_autoscaling_group" "web-sg" {
-  availability_zones = ["us-east-1a"]
+resource "aws_autoscaling_group" "web-asg" {
+  name = "web-asg"
   desired_capacity   = 1
   max_size           = 2
   min_size           = 1
@@ -223,3 +223,84 @@ resource "aws_autoscaling_group" "web-sg" {
 }
 
 # ------------------------------------------------------------------------------->
+# --------------------------------------------------------------------------------->
+# APP
+# launch template 
+resource "aws_launch_template" "app" {
+   name = "app1"
+  image_id = "ami-0866a3c8686eaeeba"
+  instance_type = "t2.micro"
+  network_interfaces {
+    device_index = 0
+    security_groups = [aws_security_group.asg-app-sg.id]
+  }
+
+tag_specifications {
+  resource_type = "instance"
+  tags = {
+    Name = "app-lt"
+  }  
+}
+}
+# --------------------------------------------------------------->
+# App alb
+resource "aws_alb" "app-alb" {
+   name               = "app-alb"
+  internal           = false
+  load_balancer_type = "application"
+  security_groups    = [aws_security_group.alb-sg-app.id]
+  subnets            = [aws_subnet.app-sub1.id,aws_subnet.app-sub2.id]
+
+  tags = {
+    Name = "app-alb"
+  }
+}
+# ------------------------------------------->
+# Traget group
+resource "aws_lb_target_group" "app-tg" {
+  name     = "app-tg"
+  port     = 80
+  protocol = "HTTP"
+  vpc_id   = aws_vpc.my-vpc.id
+
+   health_check {
+    path    = "/"
+    matcher = 200
+
+  }
+}
+
+resource "aws_lb_listener" "app-listener" {
+  load_balancer_arn = aws_alb.app-alb.arn
+  port              = "80"
+  protocol          = "HTTP"
+
+
+  default_action {
+    type             = "forward"
+    target_group_arn = aws_lb_target_group.app-tg.arn
+  }
+}
+
+# ---------------------------------------------------------------->
+# ASG
+resource "aws_autoscaling_group" "app-asg" {
+  name = "app-asg"
+  desired_capacity   = 1
+  max_size           = 2
+  min_size           = 1
+  target_group_arns = [aws_lb_target_group.app-tg.arn]
+  health_check_type = "EC2"
+  vpc_zone_identifier = [aws_subnet.app-sub1.id,aws_subnet.app-sub2.id]
+  launch_template {
+    id      = aws_launch_template.app.id
+    version = aws_launch_template.app.latest_version
+  }
+}
+
+
+# -------------------------------------------------------------->
+# -------------------------------------------------------------->
+
+# DB
+
