@@ -77,8 +77,7 @@ resource "aws_internet_gateway" "igw" {
 # -------------------------------------------------------------------------->
 # EIP
 resource "aws_eip" "eip" {
-  domain = myvpc
-
+  domain = "vpc"
 }
 
 # ------------------------------------------------------------------------->
@@ -312,7 +311,9 @@ resource "aws_db_subnet_group" "db-subnet-group" {
     Name = "DB"
   }
 }
-
+# data "aws_secretsmanager_secret_version" "password" {
+#   secret_id = data.aws_secretsmanager_secret.password
+# }
 resource "aws_db_instance" "rds-db" {
   allocated_storage    = 10
   db_name              = "mydbrds"
@@ -320,7 +321,7 @@ resource "aws_db_instance" "rds-db" {
   engine_version       = "5.7"
   instance_class       = "db.t3.micro"
   username             = "dbuser"
-  password             = data.aws_secretsmanager_secret_version.password
+  password             = aws_secretsmanager_secret_version.password.secret_string
   parameter_group_name = "default.mysql5.7"
   db_subnet_group_name = aws_db_subnet_group.db-subnet-group.name
   vpc_security_group_ids = [ aws_security_group.db-sg.id ]
