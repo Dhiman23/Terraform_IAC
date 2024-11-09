@@ -77,7 +77,7 @@ resource "aws_internet_gateway" "igw" {
 # -------------------------------------------------------------------------->
 # EIP
 resource "aws_eip" "eip" {
-  domain = vpc
+  domain = myvpc
 
 }
 
