@@ -4,44 +4,44 @@ resource "aws_vpc" "my-vpc" {
 # -----------------------------------------------------------------------------------
 # Tire 1
 resource "aws_subnet" "web-sub1" {
-  vpc_id     = aws_vpc.my-vpc.id
-  cidr_block = "10.0.0.0/24"
-  availability_zone = "us-east-1a"
+  vpc_id                  = aws_vpc.my-vpc.id
+  cidr_block              = "10.0.0.0/24"
+  availability_zone       = "us-east-1a"
   map_public_ip_on_launch = true
-  tags={
+  tags = {
     Name = "web-sub-1"
   }
 }
 
 resource "aws_subnet" "web-sub2" {
-  vpc_id     = aws_vpc.my-vpc.id
-  cidr_block = "10.0.0.0/24"
-  availability_zone = "us-east-1b"
+  vpc_id                  = aws_vpc.my-vpc.id
+  cidr_block              = "10.0.0.0/24"
+  availability_zone       = "us-east-1b"
   map_public_ip_on_launch = true
 
-   tags={
+  tags = {
     Name = "web-sub-2"
   }
 }
 # --------------------------------------------------------------------------------------
 # Tire 2
 resource "aws_subnet" "app-sub1" {
-  vpc_id     = aws_vpc.my-vpc.id
-  cidr_block = "10.0.0.0/24"
-  availability_zone = "us-east-1a"
+  vpc_id                  = aws_vpc.my-vpc.id
+  cidr_block              = "10.0.0.0/24"
+  availability_zone       = "us-east-1a"
   map_public_ip_on_launch = false
-  tags={
+  tags = {
     Name = "app-sub-1"
   }
 }
 
 resource "aws_subnet" "app-sub2" {
-  vpc_id     = aws_vpc.my-vpc.id
-  cidr_block = "10.0.0.0/24"
-  availability_zone = "us-east-1b"
+  vpc_id                  = aws_vpc.my-vpc.id
+  cidr_block              = "10.0.0.0/24"
+  availability_zone       = "us-east-1b"
   map_public_ip_on_launch = false
 
-   tags={
+  tags = {
     Name = "app-sub-2"
   }
 }
@@ -49,22 +49,22 @@ resource "aws_subnet" "app-sub2" {
 # --------------------------------------------------------------------------------------
 # Tire 3
 resource "aws_subnet" "db-sub1" {
-  vpc_id     = aws_vpc.my-vpc.id
-  cidr_block = "10.0.0.0/24"
-  availability_zone = "us-east-1a"
+  vpc_id                  = aws_vpc.my-vpc.id
+  cidr_block              = "10.0.0.0/24"
+  availability_zone       = "us-east-1a"
   map_public_ip_on_launch = false
-  tags={
+  tags = {
     Name = "db-sub-1"
   }
 }
 
 resource "aws_subnet" "db-sub2" {
-  vpc_id     = aws_vpc.my-vpc.id
-  cidr_block = "10.0.0.0/24"
-  availability_zone = "us-east-1b"
+  vpc_id                  = aws_vpc.my-vpc.id
+  cidr_block              = "10.0.0.0/24"
+  availability_zone       = "us-east-1b"
   map_public_ip_on_launch = false
 
-   tags={
+  tags = {
     Name = "db-sub-2"
   }
 }
@@ -111,12 +111,12 @@ resource "aws_route_table" "public-rt" {
   }
 }
 resource "aws_route_table_association" "rt-web-sub-1" {
-  subnet_id      = aws_subnet.web-sub1
+  subnet_id      = aws_subnet.web-sub1.id
   route_table_id = aws_route_table.public-rt.id
 }
 
 resource "aws_route_table_association" "rt-web-sub-2" {
-  subnet_id      = aws_subnet.web-sub2
+  subnet_id      = aws_subnet.web-sub2.id
   route_table_id = aws_route_table.public-rt.id
 }
 # --------------------------------------------------------------------------->
@@ -135,42 +135,42 @@ resource "aws_route_table" "private-rt" {
 }
 
 resource "aws_route_table_association" "rt-app-sub-1" {
-  subnet_id      = aws_subnet.app-sub1
+  subnet_id      = aws_subnet.app-sub1.id
   route_table_id = aws_route_table.private-rt.id
 }
 
 resource "aws_route_table_association" "rt-app-sub-2" {
-  subnet_id      = aws_subnet.app-sub2
+  subnet_id      = aws_subnet.app-sub2.id
   route_table_id = aws_route_table.private-rt.id
 }
 
 # ------------------------------------------------------------------------------>
 # launch template for web tier
 resource "aws_launch_template" "web" {
-  name = "web1"
-  image_id = "ami-0866a3c8686eaeeba"
+  name          = "web1"
+  image_id      = "ami-0866a3c8686eaeeba"
   instance_type = "t2.micro"
   network_interfaces {
-    device_index = 0
+    device_index    = 0
     security_groups = [aws_security_group.asg-web-sg.id]
   }
-  user_data       = templatefile("./script.sh", {})
-tag_specifications {
-  resource_type = "instance"
-  tags = {
-    Name = "web-lt"
-  }  
-}
+  user_data = templatefile("./script.sh", {})
+  tag_specifications {
+    resource_type = "instance"
+    tags = {
+      Name = "web-lt"
+    }
+  }
 }
 
 # ----------------------------------------------------------------------->
 # ABL web
 resource "aws_alb" "web-alb" {
-   name               = "web-alb"
+  name               = "web-alb"
   internal           = false
   load_balancer_type = "application"
   security_groups    = [aws_security_group.alb-sg-web.id]
-  subnets            = [aws_subnet.web-sub1.id,aws_subnet.web-sub2.id]
+  subnets            = [aws_subnet.web-sub1.id, aws_subnet.web-sub2.id]
 
   tags = {
     Name = "web-alb"
@@ -185,7 +185,7 @@ resource "aws_lb_target_group" "web-tg" {
   protocol = "HTTP"
   vpc_id   = aws_vpc.my-vpc.id
 
-   health_check {
+  health_check {
     path    = "/"
     matcher = 200
 
@@ -208,13 +208,13 @@ resource "aws_lb_listener" "web-listener" {
 # AutoScaling Group
 
 resource "aws_autoscaling_group" "web-asg" {
-  name = "web-asg"
-  desired_capacity   = 1
-  max_size           = 2
-  min_size           = 1
-  target_group_arns = [aws_lb_target_group.web-tg.arn]
-  health_check_type = "EC2"
-  vpc_zone_identifier = [aws_subnet.web-sub1.id,aws_subnet.web-sub2.id]
+  name                = "web-asg"
+  desired_capacity    = 1
+  max_size            = 2
+  min_size            = 1
+  target_group_arns   = [aws_lb_target_group.web-tg.arn]
+  health_check_type   = "EC2"
+  vpc_zone_identifier = [aws_subnet.web-sub1.id, aws_subnet.web-sub2.id]
   launch_template {
     id      = aws_launch_template.web.id
     version = aws_launch_template.web.latest_version
@@ -226,29 +226,29 @@ resource "aws_autoscaling_group" "web-asg" {
 # APP
 # launch template 
 resource "aws_launch_template" "app" {
-   name = "app1"
-  image_id = "ami-0866a3c8686eaeeba"
+  name          = "app1"
+  image_id      = "ami-0866a3c8686eaeeba"
   instance_type = "t2.micro"
   network_interfaces {
-    device_index = 0
+    device_index    = 0
     security_groups = [aws_security_group.asg-app-sg.id]
   }
 
-tag_specifications {
-  resource_type = "instance"
-  tags = {
-    Name = "app-lt"
-  }  
-}
+  tag_specifications {
+    resource_type = "instance"
+    tags = {
+      Name = "app-lt"
+    }
+  }
 }
 # --------------------------------------------------------------->
 # App alb
 resource "aws_alb" "app-alb" {
-   name               = "app-alb"
+  name               = "app-alb"
   internal           = false
   load_balancer_type = "application"
   security_groups    = [aws_security_group.alb-sg-app.id]
-  subnets            = [aws_subnet.app-sub1.id,aws_subnet.app-sub2.id]
+  subnets            = [aws_subnet.app-sub1.id, aws_subnet.app-sub2.id]
 
   tags = {
     Name = "app-alb"
@@ -262,7 +262,7 @@ resource "aws_lb_target_group" "app-tg" {
   protocol = "HTTP"
   vpc_id   = aws_vpc.my-vpc.id
 
-   health_check {
+  health_check {
     path    = "/"
     matcher = 200
 
@@ -284,13 +284,13 @@ resource "aws_lb_listener" "app-listener" {
 # ---------------------------------------------------------------->
 # ASG
 resource "aws_autoscaling_group" "app-asg" {
-  name = "app-asg"
-  desired_capacity   = 1
-  max_size           = 2
-  min_size           = 1
-  target_group_arns = [aws_lb_target_group.app-tg.arn]
-  health_check_type = "EC2"
-  vpc_zone_identifier = [aws_subnet.app-sub1.id,aws_subnet.app-sub2.id]
+  name                = "app-asg"
+  desired_capacity    = 1
+  max_size            = 2
+  min_size            = 1
+  target_group_arns   = [aws_lb_target_group.app-tg.arn]
+  health_check_type   = "EC2"
+  vpc_zone_identifier = [aws_subnet.app-sub1.id, aws_subnet.app-sub2.id]
   launch_template {
     id      = aws_launch_template.app.id
     version = aws_launch_template.app.latest_version
@@ -304,8 +304,8 @@ resource "aws_autoscaling_group" "app-asg" {
 # DB
 
 resource "aws_db_subnet_group" "db-subnet-group" {
-  name = "db subnet group"
-  subnet_ids = [aws_subnet.db-sub1.id,aws_subnet.db-sub2.id]
+  name       = "db subnet group"
+  subnet_ids = [aws_subnet.db-sub1.id, aws_subnet.db-sub2.id]
 
   tags = {
     Name = "DB"
@@ -315,15 +315,15 @@ resource "aws_db_subnet_group" "db-subnet-group" {
 #   secret_id = data.aws_secretsmanager_secret.password
 # }
 resource "aws_db_instance" "rds-db" {
-  allocated_storage    = 10
-  db_name              = "mydbrds"
-  engine               = "mysql"
-  engine_version       = "5.7"
-  instance_class       = "db.t3.micro"
-  username             = "dbuser"
-  password             = aws_secretsmanager_secret_version.password.secret_string
-  parameter_group_name = "default.mysql5.7"
-  db_subnet_group_name = aws_db_subnet_group.db-subnet-group.name
-  vpc_security_group_ids = [ aws_security_group.db-sg.id ]
-  skip_final_snapshot  = true
+  allocated_storage      = 10
+  db_name                = "mydbrds"
+  engine                 = "mysql"
+  engine_version         = "5.7"
+  instance_class         = "db.t3.micro"
+  username               = "dbuser"
+  password               = aws_secretsmanager_secret_version.password.secret_string
+  parameter_group_name   = "default.mysql5.7"
+  db_subnet_group_name   = aws_db_subnet_group.db-subnet-group.name
+  vpc_security_group_ids = [aws_security_group.db-sg.id]
+  skip_final_snapshot    = true
 }

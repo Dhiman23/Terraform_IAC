@@ -4,11 +4,11 @@ resource "aws_security_group" "db-sg" {
   vpc_id      = aws_vpc.my-vpc.id
 
   ingress {
-    
-    from_port   = 3306
-    to_port     = 3306
-    protocol    = "tcp"
-    security_groups = [aws_security_group.alb-sg-app.id ]
+
+    from_port       = 3306
+    to_port         = 3306
+    protocol        = "tcp"
+    security_groups = [aws_security_group.alb-sg-app.id]
   }
 
 

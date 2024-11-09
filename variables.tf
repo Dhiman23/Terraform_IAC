@@ -3,5 +3,5 @@ variable "cidr" {
 }
 
 variable "ports" {
-  default = ["80","22"]
+  default = ["80", "22"]
 }
