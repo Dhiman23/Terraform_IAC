@@ -39,6 +39,7 @@
           uses: reviewdog/action-tflint@v1
           with:
             github_token: ${{ secrets.TOKEN_ID }}
+            working_directory: TERRAFORM_IAC
             fail_on_error: "true"
             tflint_version: v0.24.0
   
