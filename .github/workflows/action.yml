@@ -36,7 +36,7 @@
         - name: Terraform init
           run: terraform init
         - name: tflint
-          uses: reviewdog/action-tflint@v1
+          uses: actions/@notrenderfarm/tflint-action@v1
           with:
             github_token: ${{ secrets.TOKEN_ID }}
             fail_on_error: "true"
