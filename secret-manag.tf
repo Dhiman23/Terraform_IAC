@@ -14,3 +14,4 @@ resource "aws_secretsmanager_secret_version" "password" {
 
 }
 
+#added
