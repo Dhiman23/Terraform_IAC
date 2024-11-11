@@ -36,9 +36,13 @@
         - name: Terraform init
           run: terraform init
         - name: tflint
-          uses: actions/@notrenderfarm/tflint-action@v1
-          with:
-            github_token: ${{ secrets.TOKEN_ID }}
-            fail_on_error: "true"
-            tflint_version: v0.24.0
+          run: |
+            curl -L https://raw.githubusercontent.com/terraform-linters/tflint/master/install_linux.sh | bash
+          
+        - name: tflint intalization
+          run: tflint --init
+
+        - name: tflint scan
+          run: tflint
+  
   
