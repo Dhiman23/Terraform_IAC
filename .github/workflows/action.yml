@@ -1,50 +1,50 @@
----
-  name: CI
-  on:
-    push:
-      branches:
-        - main
-    pull_request:
-      branches:
-        - main
-    workflow_dispatch:
-      inputs:
-        action:
-          description: select action
-          required: true
-          type: choice
-          options:
-            - apply
-            - destroy
-  jobs:
-    build:
-      runs-on: ubuntu-latest
-      steps:
-        - name: Checkout
-          uses: actions/checkout@v4
-        - name: setup terraform
-          uses: hashicorp/setup-terraform@v3
-          with:
-            terraform_version: 1.4.0
-            terraform_wrapper: false
-        - name: configure AWS cred
-          uses: aws-actions/configure-aws-credentials@v4
-          with:
-            aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-            aws-secret-access-key: ${{ secrets.AWS_SECRET_KEY_ID}}
-            aws-region: us-east-1
-        - name: Terraform init
-          run: terraform init
-        - name: tflint
-          run: |
-            curl -L https://raw.githubusercontent.com/terraform-linters/tflint/master/install_linux.sh | bash
-          
-        - name: tflint intalization
-          run: tflint --init
+name: CI
 
-        - name: tflint scan
-          run: tflint 
-        
-        
-  
-  
+on:
+  workflow_dispatch:
+    inputs:
+      action:
+        description: select action
+        required: true
+        type: choice
+        options:
+          - Terraform_apply
+          - Terraform_destroy
+
+jobs:
+  terraform_apply:
+    name: Terraform Apply
+    if: ${{ github.event.inputs.action == 'Terraform_apply' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.4.0
+          terraform_wrapper: false
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_KEY_ID }}
+          aws-region: us-east-1
+
+      - name: Terraform Init
+        run: terraform init
+
+      - name: Install tflint
+        run: |
+          curl -L https://raw.githubusercontent.com/terraform-linters/tflint/master/install_linux.sh | bash
+
+      - name: Initialize tflint
+        run: tflint --init
+
+      - name: Run tflint
+        run: tflint
+
+      - name: Terraform Validate
+        run: terraform validate
