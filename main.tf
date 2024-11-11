@@ -150,6 +150,7 @@ resource "aws_launch_template" "web" {
   name          = "web1"
   image_id      = "ami-0866a3c8686eaeeba"
   instance_type = "t2.micro"
+  key_name = "IAC"
   network_interfaces {
     device_index    = 0
     security_groups = [aws_security_group.asg-web-sg.id]
