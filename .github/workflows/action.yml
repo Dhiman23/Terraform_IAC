@@ -49,6 +49,6 @@
           uses: actions/upload-artifact@v3
           with:
             name: tflint-report
-            path: tflint_report.txt
+            path: tflintScanReport.txt
   
   
