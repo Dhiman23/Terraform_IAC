@@ -43,12 +43,8 @@
           run: tflint --init
 
         - name: tflint scan
-          run: tflint > tflintScanReport.txt
+          run: tflint 
         
-        - name: Upload tflint Report
-          uses: actions/upload-artifact@v3
-          with:
-            name: tflint-report
-            path: tflintScanReport.txt
+        
   
   
