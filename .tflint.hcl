@@ -10,3 +10,7 @@ rule "terraform_required_providers" {
   source = false
   version = false
 }
+
+rule "terraform_required_version" {
+  enabled = false
+}
