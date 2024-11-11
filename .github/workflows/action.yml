@@ -53,7 +53,7 @@ jobs:
         run: terraform apply --auto-approve
 
   terraform_destroy:
-    name: Terraform Apply
+    name: Terraform Destroy
     if: ${{ github.event.inputs.action == 'Terraform_destroy' }}
     runs-on: ubuntu-latest
     steps:
@@ -74,6 +74,6 @@ jobs:
           aws-region: us-east-1
       - name: Terraform Init
         run: terraform init
-        
+
       - name: Terraform destroy
         run: terraform destroy --auto-approve
