@@ -322,7 +322,7 @@ resource "aws_db_instance" "rds-db" {
   engine_version         = "5.7"
   instance_class         = "db.t3.micro"
   username               = "dbuser"
-  password               = aws_secretsmanager_secret_version.password.secret_string
+  password               = var.db_password
   parameter_group_name   = "default.mysql5.7"
   db_subnet_group_name   = aws_db_subnet_group.db-subnet-group.name
   vpc_security_group_ids = [aws_security_group.db-sg.id]

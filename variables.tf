@@ -7,3 +7,8 @@ variable "ports" {
   default = ["80", "22"]
   type = list(string)
 }
+
+variable "db_password" {
+  default =   "admin123"
+  type = string
+}
